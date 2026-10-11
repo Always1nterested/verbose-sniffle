@@ -35,10 +35,20 @@
 #konami-flash.play{animation:konamiFlash 2.6s ease-out forwards}
 @keyframes konamiFlash{0%{opacity:0}8%{opacity:.9}17%{opacity:.08}30%{opacity:.52}44%{opacity:.03}62%{opacity:.35}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){#konami-flash.play{animation:konamiFlash 1.2s ease-out forwards}}
+
+/* Cryptic discovery hints, visible only to visitors who haven't found the secret. */
+.discovery-hint{position:fixed;left:50%;bottom:clamp(34px,8vh,85px);transform:translate(-50%,12px);z-index:5;max-width:calc(100vw - 44px);width:max-content;text-align:center;pointer-events:none;color:#b9c8e8;font-size:clamp(.79rem,1.6vw,1rem);letter-spacing:.09em;line-height:1.7;text-shadow:0 0 22px #6688ee88;opacity:0;transition:opacity .8s ease,transform .8s ease}
+.discovery-hint.visible{opacity:.9;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){.discovery-hint{transition:none}}
+/* A single, subtle invitation that disappears after the first few seconds. */
+.arrival-hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;pointer-events:none;text-align:center;max-width:calc(100vw - 48px);width:max-content;color:#dce6ff;font-size:clamp(.95rem,2vw,1.25rem);font-weight:400;letter-spacing:.13em;text-shadow:0 0 24px #8aafff88;animation:arrivalHint 5.3s ease-in-out both}
+@keyframes arrivalHint{0%{opacity:0;transform:translate(-50%,-45%)}12%{opacity:.95;transform:translate(-50%,-50%)}60%{opacity:.95}100%{opacity:0;transform:translate(-50%,-55%)}}
+@media(prefers-reduced-motion:reduce){.arrival-hint{animation:arrivalHint 5.3s linear both}}
 </style>
 </head>
 <body>
-<canvas id="stars" aria-label="Interactive glowing particle field"></canvas>
+<div class="arrival-hint" aria-label="There is more to discover">There’s more here than meets the eye.</div>
+<canvas id="stars" aria-label="Interactive glowing particle field"></canvas>\n<div class="discovery-hint" id="discovery-hint" role="status" aria-live="polite"></div>
 <div id="konami-flash" aria-hidden="true"></div>
 <!-- Upload your licensed clip as HD2.mp3 next to index.html. -->
 <audio id="konami-audio" preload="none" src="HD2.mp3"></audio>
@@ -54,6 +64,31 @@
 <script>
 (()=>{
 document.getElementById('linkedin-planet').addEventListener('click',()=>{window.open('https://www.linkedin.com/in/sam-carts','_blank','noopener,noreferrer');});
+const hintElement=document.getElementById('discovery-hint');
+const hintStorageKey='samcarts-easteregg-discovered-v1';
+let discovered=false;
+try{discovered=localStorage.getItem(hintStorageKey)==='yes';}catch(e){}
+let hintPath=Math.random()<.5?'star':'konami';
+const hintLines={
+ star:['Not every star belongs to the sky.','Some stars prefer attention.','Five wishes. One star.'],
+ konami:['Some doors have no handles.','The old ways still work.','A certain sequence once granted thirty lives. Similar techniques are now used to deploy democracy.']
+};
+let hintTimeouts=[],hintHideTimer=null,hintsStopped=discovered;
+function clearHint(){clearTimeout(hintHideTimer);hintElement.classList.remove('visible');}
+function stopHints(){
+ hintsStopped=true;hintTimeouts.forEach(clearTimeout);hintTimeouts=[];clearHint();
+ try{localStorage.setItem(hintStorageKey,'yes');}catch(e){}
+}
+function displayHint(i){
+ if(hintsStopped||document.hidden)return;
+ hintElement.textContent=hintLines[hintPath][i];
+ hintElement.classList.add('visible');
+ clearTimeout(hintHideTimer);
+ hintHideTimer=setTimeout(clearHint,4000);
+}
+if(!discovered)[20,45,70].forEach((seconds,i)=>hintTimeouts.push(setTimeout(()=>displayHint(i),seconds*1000)));
+let starInterest=0,keyboardInterest=0;
+function favorPath(path){if(hintsStopped)return;hintPath=path;}
 const canvas=document.getElementById('stars'),ctx=canvas.getContext('2d'),spark=document.getElementById('spark'),overlay=document.getElementById('overlay');let w,h,dpr,particles=[],bursts=[],last=0,secretMode=false,blackHole=null,meteorStorm=null;const pointer={x:-1000,y:-1000};
 function resize(){dpr=Math.min(devicePixelRatio||1,2);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(180,Math.max(65,Math.round(w*h/9000)));particles=Array.from({length:count},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:Math.random()*1.8+.5,a:Math.random()*.55+.25,phase:Math.random()*6.28}));}
 function draw(t){const dt=Math.min((t-last)/16.67||1,3);last=t;ctx.clearRect(0,0,w,h);
@@ -64,14 +99,7 @@ for(const m of meteorStorm.meteors){m.x+=m.vx*dt;m.y+=m.vy*dt;const mag=Math.hyp
 ctx.shadowBlur=0;meteorStorm.meteors=meteorStorm.meteors.filter(m=>m.y<h+200&&m.x>-250);
 if(elapsed>5600){meteorStorm.meteors=[];}
 }}
-if(blackHole){const elapsed=t-blackHole.start;const cx=w/2,cy=h/2;
-if(elapsed>5100){blackHole=null;document.getElementById('singularity').classList.remove('active');secretMode=false;}
-else{const pull=elapsed<2500,flash=elapsed>=2500&&elapsed<3100;
-const halo=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*.35);
-halo.addColorStop(0,flash?'#f4f9ffbb':'#000000');halo.addColorStop(.10,flash?'#9bcaff77':'#070917');halo.addColorStop(.25,flash?'#6d95ff25':'#4c67c522');halo.addColorStop(1,'#00000000');
-ctx.fillStyle=halo;ctx.fillRect(0,0,w,h);
-if(pull){ctx.beginPath();ctx.arc(cx,cy,Math.max(8,22*(1-elapsed/2500)),0,Math.PI*2);ctx.fillStyle='#020208';ctx.shadowBlur=30;ctx.shadowColor='#8caaff';ctx.fill();ctx.shadowBlur=0;}
-}}
+if(blackHole && t-blackHole.start>5100){blackHole=null;document.getElementById('singularity').classList.remove('active');secretMode=false;}
 for(const p of particles){if(blackHole){const elapsed=t-blackHole.start,dx=w/2-p.x,dy=h/2-p.y,dist=Math.max(1,Math.hypot(dx,dy));if(elapsed<2500){const strength=(.12+elapsed/2500*.9)*dt;p.vx+=dx/dist*strength;p.vy+=dy/dist*strength;p.vx*=.98;p.vy*=.98;}else if(!blackHole.exploded){blackHole.exploded=true;for(const q of particles){const angle=Math.atan2(q.y-h/2,q.x-w/2)+(Math.random()-.5)*1.1;q.x=w/2+(Math.random()-.5)*18;q.y=h/2+(Math.random()-.5)*18;const power=5+Math.random()*12;q.vx=Math.cos(angle)*power;q.vy=Math.sin(angle)*power;}bursts.push({x:w/2,y:h/2,r:3,life:90});}else{p.vx*=.992;p.vy*=.992;}p.x+=p.vx*dt;p.y+=p.vy*dt;const a=p.a*(.75+.25*Math.sin(t*.0015+p.phase));ctx.beginPath();ctx.arc(p.x,p.y,p.r*(elapsed>=2500?1.6:1),0,Math.PI*2);ctx.fillStyle=`rgba(180,216,255,${a})`;ctx.shadowBlur=18;ctx.shadowColor='#92baff';ctx.fill();continue;}const dx=p.x-pointer.x,dy=p.y-pointer.y,dist=Math.hypot(dx,dy);if(dist<170&&dist>0){const force=(170-dist)/170*.09;p.vx+=dx/dist*force*dt;p.vy+=dy/dist*force*dt;}p.vx*=.995;p.vy*=.995;const speed=Math.hypot(p.vx,p.vy);if(speed>1.4){p.vx=p.vx/speed*1.4;p.vy=p.vy/speed*1.4;}p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.x<-5)p.x=w+5;if(p.x>w+5)p.x=-5;if(p.y<-5)p.y=h+5;if(p.y>h+5)p.y=-5;const a=p.a*(.75+.25*Math.sin(t*.0015+p.phase));ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${secretMode?'163,255,218':'170,196,255'},${a})`;ctx.shadowBlur=12;ctx.shadowColor=secretMode?'#8affd9':'#7c9bff';ctx.fill();}ctx.shadowBlur=0;for(let i=0;i<particles.length;i++){const a=particles[i];for(let j=i+1;j<particles.length;j++){const b=particles[j],dist=Math.hypot(a.x-b.x,a.y-b.y);if(dist<105){ctx.strokeStyle=`rgba(${secretMode?'116,255,202':'120,154,245'},${(1-dist/105)*.13})`;ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}bursts=bursts.filter(b=>b.life>0);for(const b of bursts){b.life-=dt;b.r+=2.8*dt;ctx.strokeStyle=`rgba(180,208,255,${Math.max(0,b.life/40)*.55})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.stroke();}requestAnimationFrame(draw);}
 function startMeteorStorm(){if(blackHole||meteorStorm)return;overlay.classList.remove('show');pointer.x=-1000;pointer.y=-1000;secretMode=true;meteorStorm={start:performance.now(),meteors:[]};for(const p of particles){p.vx+=(Math.random()-.5)*2;p.vy+=(Math.random()-.5)*2;}}
 const meteorIcon=document.getElementById('secret-title');meteorIcon.addEventListener('click',startMeteorStorm);meteorIcon.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();startMeteorStorm();}});
@@ -114,7 +142,7 @@ function konamiCelebration(){
   },delay)));
 }
 let audioStart=0;
-function reveal(fromKonami=false){if(blackHole||meteorStorm||loveMessage.classList.contains('show'))return;secretMode=true;overlay.classList.add('show');document.getElementById('blackhole').focus();if(fromKonami){audioStart=performance.now();konamiCelebration();}}function close(){overlay.classList.remove('show');secretMode=false;spark.focus();}let taps=0,tapTimer;function poke(){taps++;spark.style.transform=`rotate(${taps*35}deg) scale(1.3)`;clearTimeout(tapTimer);tapTimer=setTimeout(()=>{taps=0;spark.style.transform=''},1800);if(taps>=5){taps=0;reveal();}}spark.addEventListener('click',poke);spark.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();poke();}});const konami=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let keys=[];addEventListener('keydown',e=>{keys.push(e.key);keys=keys.slice(-10);if(keys.join('|')===konami.join('|')){keys=[];reveal(true);}});addEventListener('pointermove',e=>{pointer.x=e.clientX;pointer.y=e.clientY;},{passive:true});addEventListener('pointerleave',()=>{pointer.x=-1000;pointer.y=-1000;});addEventListener('pointerdown',e=>{if(e.target===canvas||e.target.closest('.shell'))bursts.push({x:e.clientX,y:e.clientY,r:5,life:40});});addEventListener('resize',resize);resize();requestAnimationFrame(draw);
+function reveal(fromKonami=false){if(blackHole||meteorStorm||loveMessage.classList.contains('show'))return;stopHints();secretMode=true;overlay.classList.add('show');document.getElementById('blackhole').focus();if(fromKonami){audioStart=performance.now();konamiCelebration();}}function close(){overlay.classList.remove('show');secretMode=false;spark.focus();}let taps=0,tapTimer;function poke(){starInterest++;if(starInterest>=2)favorPath('star');taps++;spark.style.transform=`rotate(${taps*35}deg) scale(1.3)`;clearTimeout(tapTimer);tapTimer=setTimeout(()=>{taps=0;spark.style.transform=''},1800);if(taps>=5){taps=0;reveal();}}spark.addEventListener('click',poke);spark.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();poke();}});const konami=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];let keys=[];addEventListener('keydown',e=>{if(e.key.startsWith('Arrow')){keyboardInterest++;if(keyboardInterest>=3&&starInterest<2)favorPath('konami');}keys.push(e.key);keys=keys.slice(-10);if(keys.join('|')===konami.join('|')){keys=[];reveal(true);}});addEventListener('pointermove',e=>{pointer.x=e.clientX;pointer.y=e.clientY;},{passive:true});addEventListener('pointerleave',()=>{pointer.x=-1000;pointer.y=-1000;});addEventListener('pointerdown',e=>{if(e.target===canvas||e.target.closest('.shell'))bursts.push({x:e.clientX,y:e.clientY,r:5,life:40});});addEventListener('resize',resize);resize();requestAnimationFrame(draw);
 })();
 </script>
 </body></html>
