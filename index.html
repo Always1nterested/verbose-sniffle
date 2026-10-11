@@ -9,13 +9,18 @@
 #singularity{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(circle at 50% 50%,transparent 0%,#02030a70 75%)}
 #singularity.active{opacity:1}.secret h2{cursor:pointer;user-select:none;transition:transform .2s,filter .2s}.secret h2:hover,.secret h2:focus-visible{transform:scale(1.25);filter:drop-shadow(0 0 24px #ffb1e7);outline:none}.secret h2{font-size:clamp(2rem,6vw,3.5rem);letter-spacing:-.05em;margin:12px 0}.secret p{color:#aebbd5;line-height:1.6}.secret button{margin-top:20px;background:#c8d7ff;color:#10182e;border:0;border-radius:50px;padding:13px 25px;font-weight:800;cursor:pointer}.secret button:hover{background:white}@media(max-width:600px){.status{display:none}.bottom .right{display:none}.hero{transform:translateY(-1vh)}.eyebrow{letter-spacing:.2em}}
 
-/* Tiny secret planets, tucked into the lower-left of the Easter egg. */
+/* LinkedIn stays at bottom-left; the tiny Abby planet sits at bottom-right. */
+/* Subtle independent oscillation of the LinkedIn planet's rings. */
+.linkedin-ring-back,.linkedin-ring-front{transform-origin:22px 22px;animation:ring-sway 3.8s ease-in-out infinite alternate}
+.linkedin-ring-front{animation-delay:-.12s}
+@keyframes ring-sway{from{transform:rotate(-8deg) scaleY(.92)}to{transform:rotate(9deg) scaleY(1.08)}}
+@media (prefers-reduced-motion:reduce){.linkedin-ring-back,.linkedin-ring-front{animation:none}}
 .secret-planets{position:absolute;bottom:clamp(18px,4vw,45px);left:clamp(18px,4vw,45px);display:flex;align-items:center;gap:14px}
 .secret-planet{display:grid;place-items:center;width:42px;height:42px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;text-decoration:none;cursor:pointer;opacity:.46;transition:opacity .2s,transform .2s,filter .2s}
 .secret-planet:hover,.secret-planet:focus-visible{opacity:1;transform:translateY(-5px) rotate(-12deg);filter:drop-shadow(0 0 12px #9ab5ff);outline:2px solid #8ba6ff;outline-offset:3px}
 .secret-planet svg{width:33px;height:33px;overflow:visible}
-/* Abby is the tiny planet at the far bottom-left; LinkedIn stays larger beside it. */
-#abby-planet{order:-1;width:21px;height:21px;opacity:.30;margin-right:8px}
+/* Position Abby independently at the opposite corner of the Easter egg overlay. */
+#abby-planet{position:fixed;left:auto;right:clamp(18px,4vw,45px);bottom:clamp(18px,4vw,45px);width:21px;height:21px;opacity:.30;margin:0}
 #abby-planet svg{width:16.5px;height:16.5px}
 #abby-planet:hover,#abby-planet:focus-visible{opacity:1}
 .love-message{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#050818e8;backdrop-filter:blur(16px);visibility:hidden;opacity:0;transition:opacity .3s,visibility .3s;padding:24px}
@@ -32,7 +37,7 @@
 <main class="shell" aria-label="Interactive particle universe"><span class="spark" id="spark" role="button" tabindex="0" aria-label="Secret sparkle, activate five times">✦</span></main>
 <div id="singularity" aria-hidden="true"></div><div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="secret-title"><div class="secret"><div class="glyph" id="blackhole" role="button" tabindex="0" aria-label="Activate black hole" title="Touch the star">✧</div><h2 id="secret-title" role="button" tabindex="0" aria-label="Activate meteor storm" title="Summon a meteor storm">✦</h2></div><div class="secret-planets" aria-label="Hidden planets">
 <a class="secret-planet" href="https://www.linkedin.com/in/sam-carts" target="_blank" rel="noopener noreferrer" aria-label="Visit Sam's LinkedIn" title="A distant connection">
-<svg viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="planetBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#93c5ff"/><stop offset="1" stop-color="#4551a4"/></linearGradient></defs><ellipse cx="22" cy="22" rx="21" ry="7" fill="none" stroke="#8aabeb" stroke-width="2.2" transform="rotate(-24 22 22)"/><circle cx="22" cy="22" r="12" fill="url(#planetBlue)"/><path d="M12 19c6 3 12 3 20-2M13 26c8 2 14 1 19-2" stroke="#c1d9ff" stroke-opacity=".5" fill="none" stroke-width="1.8"/><path d="M2 30c10 1 29-7 40-16" stroke="#d5e4ff" stroke-width="2" fill="none"/></svg>
+<svg viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="planetBlue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#93c5ff"/><stop offset="1" stop-color="#4551a4"/></linearGradient></defs><g class="linkedin-ring-back"><ellipse cx="22" cy="22" rx="21" ry="7" fill="none" stroke="#8aabeb" stroke-width="2.2" transform="rotate(-24 22 22)"/></g><circle cx="22" cy="22" r="12" fill="url(#planetBlue)"/><path d="M12 19c6 3 12 3 20-2M13 26c8 2 14 1 19-2" stroke="#c1d9ff" stroke-opacity=".5" fill="none" stroke-width="1.8"/><g class="linkedin-ring-front"><path d="M2 30c10 1 29-7 40-16" stroke="#d5e4ff" stroke-width="2" fill="none"/></g></svg>
 </a>
 <button class="secret-planet" id="abby-planet" type="button" aria-label="Open a secret message" title="A little planet with a secret">
 <svg viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="planetPink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffc1e4"/><stop offset="1" stop-color="#9a519f"/></linearGradient></defs><ellipse cx="22" cy="22" rx="21" ry="7" fill="none" stroke="#c89bdf" stroke-width="2.2" transform="rotate(20 22 22)"/><circle cx="22" cy="22" r="12" fill="url(#planetPink)"/><path d="M13 18c6 2 12 3 19 0M12 25c8 3 15 2 20 0" stroke="#ffe5f5" stroke-opacity=".5" fill="none" stroke-width="1.7"/><path d="M2 14c12 10 29 15 40 16" stroke="#ffe0fa" stroke-width="2" fill="none"/></svg>
