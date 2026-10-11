@@ -14,6 +14,10 @@
 .secret-planet{display:grid;place-items:center;width:42px;height:42px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;text-decoration:none;cursor:pointer;opacity:.46;transition:opacity .2s,transform .2s,filter .2s}
 .secret-planet:hover,.secret-planet:focus-visible{opacity:1;transform:translateY(-5px) rotate(-12deg);filter:drop-shadow(0 0 12px #9ab5ff);outline:2px solid #8ba6ff;outline-offset:3px}
 .secret-planet svg{width:33px;height:33px;overflow:visible}
+/* Abby is the tiny planet at the far bottom-left; LinkedIn stays larger beside it. */
+#abby-planet{order:-1;width:21px;height:21px;opacity:.30;margin-right:8px}
+#abby-planet svg{width:16.5px;height:16.5px}
+#abby-planet:hover,#abby-planet:focus-visible{opacity:1}
 .love-message{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#050818e8;backdrop-filter:blur(16px);visibility:hidden;opacity:0;transition:opacity .3s,visibility .3s;padding:24px}
 .love-message.show{visibility:visible;opacity:1}
 .love-card{text-align:center;max-width:90vw}
@@ -33,7 +37,7 @@
 <button class="secret-planet" id="abby-planet" type="button" aria-label="Open a secret message" title="A little planet with a secret">
 <svg viewBox="0 0 44 44" aria-hidden="true"><defs><linearGradient id="planetPink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffc1e4"/><stop offset="1" stop-color="#9a519f"/></linearGradient></defs><ellipse cx="22" cy="22" rx="21" ry="7" fill="none" stroke="#c89bdf" stroke-width="2.2" transform="rotate(20 22 22)"/><circle cx="22" cy="22" r="12" fill="url(#planetPink)"/><path d="M13 18c6 2 12 3 19 0M12 25c8 3 15 2 20 0" stroke="#ffe5f5" stroke-opacity=".5" fill="none" stroke-width="1.7"/><path d="M2 14c12 10 29 15 40 16" stroke="#ffe0fa" stroke-width="2" fill="none"/></svg>
 </button></div></div>
-<div class="love-message" id="love-message" role="dialog" aria-modal="true" aria-label="Secret message" aria-hidden="true"><div class="love-card"><div class="love-heart" aria-hidden="true">♥</div><p>I live Abby</p><button class="love-return" id="love-return" type="button">Return to the stars ✦</button></div></div>
+<div class="love-message" id="love-message" role="dialog" aria-modal="true" aria-label="Secret message" aria-hidden="true"><div class="love-card"><div class="love-heart" aria-hidden="true">♥</div><p>I like Abby</p><button class="love-return" id="love-return" type="button">Return to the stars ✦</button></div></div>
 <script>
 (()=>{
 const canvas=document.getElementById('stars'),ctx=canvas.getContext('2d'),spark=document.getElementById('spark'),overlay=document.getElementById('overlay');let w,h,dpr,particles=[],bursts=[],last=0,secretMode=false,blackHole=null,meteorStorm=null;const pointer={x:-1000,y:-1000};
